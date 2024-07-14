@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"sync"
 )
-
-var mtx sync.Mutex
 
 func HandleClient(conn net.Conn) {
 	defer func() {
@@ -38,10 +35,6 @@ func HandleClient(conn net.Conn) {
 		HandleStatus(conn)
 	case 2:
 		HandleLogin(conn)
-
-		mtx.Lock()
-		HandleDeployment(conn)
-		mtx.Unlock()
 	}
 }
 
@@ -102,17 +95,6 @@ func HandleLogin(conn net.Conn) {
 		return
 	}
 	log.Println("Sent login disconnect on:", conn.RemoteAddr())
-}
-
-func HandleDeployment(conn net.Conn) {
-	log.Printf("Client %v triggered server deployment\n", conn.RemoteAddr())
-
-	ip, err := ApplyTF(false)
-	if err != nil {
-		log.Println("An error occurred while applying terraform configuration:", err)
-	}
-
-	log.Println("Server successfully deployed. IP:", ip)
 }
 
 func ConvertToUUID(a, b uint64) string {
