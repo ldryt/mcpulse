@@ -4,22 +4,19 @@ import (
 	"flag"
 	"log"
 	"net"
+
+	"github.com/ldryt/mcpulse/config"
 )
 
-var (
-	ConfigPath   string
-	GlobalConfig Config
-)
+var GlobalConfig config.Config
 
 func main() {
-	ConfigPathPTR := flag.String("config", "./config.yml", "a path to the configuration file")
-
+	configPathPTR := flag.String("config", "./mcpulse.yml", "a path to the configuration file")
 	flag.Parse()
-
-	ConfigPath = *ConfigPathPTR
+	configPath := *configPathPTR
 
 	log.Println("Loading configuration...")
-	err := LoadConfig()
+	GlobalConfig, err := config.LoadConfig(configPath)
 	if err != nil {
 		log.Fatalln("An error occurred while loading configuration:", err)
 	}

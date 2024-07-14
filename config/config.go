@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/base64"
@@ -25,27 +25,25 @@ type Config struct {
 	FaviconB64  string
 }
 
-func LoadConfig() (err error) {
-	yamlFile, err := os.ReadFile(ConfigPath)
+func LoadConfig(path string) (conf Config, err error) {
+	yamlFile, err := os.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("couldn't load config: %v", err)
+		return Config{}, fmt.Errorf("couldn't load config: %v", err)
 	}
 
-	err = yaml.Unmarshal(yamlFile, &GlobalConfig)
+	err = yaml.Unmarshal(yamlFile, &conf)
 	if err != nil {
-		return fmt.Errorf("couldn't parse config: %v", err)
+		return Config{}, fmt.Errorf("couldn't parse config: %v", err)
 	}
 
-	if GlobalConfig.FaviconPath == "" {
-		return nil
+	if conf.FaviconPath != "" {
+		conf.FaviconB64, err = encodeFavicon(conf.FaviconPath)
+		if err != nil {
+			return Config{}, fmt.Errorf("couldn't encode favicon: %v", err)
+		}
 	}
 
-	GlobalConfig.FaviconB64, err = encodeFavicon(GlobalConfig.FaviconPath)
-	if err != nil {
-		return fmt.Errorf("couldn't encode favicon: %v", err)
-	}
-
-	return nil
+	return conf, nil
 }
 
 func encodeFavicon(path string) (result string, err error) {
