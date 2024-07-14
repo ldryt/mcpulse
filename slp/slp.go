@@ -1,6 +1,6 @@
 // https://wiki.vg/Server_List_Ping
 
-package main
+package slp
 
 import (
 	"encoding/binary"
@@ -8,7 +8,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/ldryt/mcpulse/utils"
+	"github.com/ldryt/mcpulse/config"
 )
 
 type HandshakeData struct {
@@ -38,9 +38,9 @@ type StatusResponse struct {
 }
 
 func handleHandshake(r io.Reader) (h HandshakeData, err error) {
-	var p utils.Packet
+	var p Packet
 
-	p, err = utils.ReadPacket(r)
+	p, err = readPacket(r)
 	if err != nil {
 		return HandshakeData{}, err
 	}
@@ -48,12 +48,12 @@ func handleHandshake(r io.Reader) (h HandshakeData, err error) {
 		return HandshakeData{}, errors.New("not an handshake packet")
 	}
 
-	h.ProtocolVersion, err = utils.ReadVarInt(&p.Data)
+	h.ProtocolVersion, err = readVarInt(&p.Data)
 	if err != nil {
 		return HandshakeData{}, err
 	}
 
-	h.ServerAddress, err = utils.ReadString(&p.Data)
+	h.ServerAddress, err = readString(&p.Data)
 	if err != nil {
 		return HandshakeData{}, err
 	}
@@ -63,7 +63,7 @@ func handleHandshake(r io.Reader) (h HandshakeData, err error) {
 		return HandshakeData{}, err
 	}
 
-	h.NextState, err = utils.ReadVarInt(&p.Data)
+	h.NextState, err = readVarInt(&p.Data)
 	if err != nil {
 		return HandshakeData{}, err
 	}
@@ -75,9 +75,9 @@ func handleHandshake(r io.Reader) (h HandshakeData, err error) {
 }
 
 func handleStatusRequest(r io.Reader) (err error) {
-	var p utils.Packet
+	var p Packet
 
-	p, err = utils.ReadPacket(r)
+	p, err = readPacket(r)
 	if err != nil {
 		return err
 	}
@@ -89,9 +89,10 @@ func handleStatusRequest(r io.Reader) (err error) {
 }
 
 func sendStatusResponse(w io.Writer) (err error) {
-	var p utils.Packet
+	var p Packet
 	var sr StatusResponse
 	var srMarshalled []byte
+	var cfg config.Config = *config.Get()
 
 	p.ID = 0
 
@@ -100,15 +101,15 @@ func sendStatusResponse(w io.Writer) (err error) {
 			Name     string `json:"name"`
 			Protocol int    `json:"protocol"`
 		}{
-			Name:     GlobalConfig.SLP.Version.Name,
-			Protocol: GlobalConfig.SLP.Version.Protocol,
+			Name:     cfg.SLP.Version.Name,
+			Protocol: cfg.SLP.Version.Protocol,
 		},
 		Description: struct {
 			Text string `json:"text"`
 		}{
-			Text: GlobalConfig.SLP.Motd,
+			Text: cfg.SLP.Motd,
 		},
-		Favicon: GlobalConfig.SLP.FaviconB64,
+		Favicon: cfg.SLP.FaviconB64,
 	}
 
 	srMarshalled, err = json.Marshal(sr)
@@ -116,12 +117,12 @@ func sendStatusResponse(w io.Writer) (err error) {
 		return err
 	}
 
-	err = utils.WriteString(&p.Data, string(srMarshalled))
+	err = writeString(&p.Data, string(srMarshalled))
 	if err != nil {
 		return err
 	}
 
-	err = utils.SendPacket(w, p)
+	err = sendPacket(w, p)
 	if err != nil {
 		return err
 	}
@@ -130,9 +131,9 @@ func sendStatusResponse(w io.Writer) (err error) {
 }
 
 func handlePingRequest(r io.Reader) (pl int64, err error) {
-	var p utils.Packet
+	var p Packet
 
-	p, err = utils.ReadPacket(r)
+	p, err = readPacket(r)
 	if err != nil {
 		return 0, err
 	}
@@ -149,7 +150,7 @@ func handlePingRequest(r io.Reader) (pl int64, err error) {
 }
 
 func sendPongResponse(w io.Writer, pl int64) (err error) {
-	var p utils.Packet
+	var p Packet
 
 	p.ID = 1
 
@@ -158,7 +159,7 @@ func sendPongResponse(w io.Writer, pl int64) (err error) {
 		return err
 	}
 
-	err = utils.SendPacket(w, p)
+	err = sendPacket(w, p)
 	if err != nil {
 		return err
 	}
@@ -167,9 +168,9 @@ func sendPongResponse(w io.Writer, pl int64) (err error) {
 }
 
 func handleLoginStart(r io.Reader) (pr PlayerData, err error) {
-	var p utils.Packet
+	var p Packet
 
-	p, err = utils.ReadPacket(r)
+	p, err = readPacket(r)
 	if err != nil {
 		return PlayerData{}, err
 	}
@@ -177,7 +178,7 @@ func handleLoginStart(r io.Reader) (pr PlayerData, err error) {
 		return PlayerData{}, errors.New("not a login start packet")
 	}
 
-	pr.Name, err = utils.ReadString(&p.Data)
+	pr.Name, err = readString(&p.Data)
 	if err != nil {
 		return PlayerData{}, err
 	}
@@ -195,16 +196,16 @@ func handleLoginStart(r io.Reader) (pr PlayerData, err error) {
 }
 
 func sendDisconnect(w io.Writer) (err error) {
-	var p utils.Packet
+	var p Packet
 
 	p.ID = 0
 
-	err = utils.WriteString(&p.Data, "No")
+	err = writeString(&p.Data, "No")
 	if err != nil {
 		return err
 	}
 
-	err = utils.SendPacket(w, p)
+	err = sendPacket(w, p)
 	if err != nil {
 		return err
 	}

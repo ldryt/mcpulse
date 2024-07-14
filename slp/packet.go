@@ -1,4 +1,4 @@
-package utils
+package slp
 
 import (
 	"bytes"
@@ -12,20 +12,20 @@ type Packet struct {
 	Data bytes.Buffer
 }
 
-func ReadPacket(r io.Reader) (p Packet, err error) {
+func readPacket(r io.Reader) (p Packet, err error) {
 	var PacketLength int32
 
-	PacketLength, err = ReadVarInt(r)
+	PacketLength, err = readVarInt(r)
 	if err != nil {
 		return Packet{}, err
 	}
 
-	p.ID, err = ReadVarInt(r)
+	p.ID, err = readVarInt(r)
 	if err != nil {
 		return Packet{}, err
 	}
 
-	_, err = io.CopyN(&p.Data, r, int64(PacketLength-int32(VarIntSize(p.ID))))
+	_, err = io.CopyN(&p.Data, r, int64(PacketLength-int32(sizeVarInt(p.ID))))
 	if err != nil {
 		return Packet{}, err
 	}
@@ -33,15 +33,15 @@ func ReadPacket(r io.Reader) (p Packet, err error) {
 	return p, nil
 }
 
-func SendPacket(w io.Writer, p Packet) (err error) {
-	var PacketLength int = VarIntSize(p.ID) + p.Data.Len()
+func sendPacket(w io.Writer, p Packet) (err error) {
+	var PacketLength int = sizeVarInt(p.ID) + p.Data.Len()
 
-	err = WriteVarInt(w, int32(PacketLength))
+	err = writeVarInt(w, int32(PacketLength))
 	if err != nil {
 		return err
 	}
 
-	err = WriteVarInt(w, p.ID)
+	err = writeVarInt(w, p.ID)
 	if err != nil {
 		return err
 	}

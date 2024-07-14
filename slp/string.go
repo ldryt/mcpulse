@@ -1,14 +1,14 @@
-package utils
+package slp
 
 import "io"
 
 // https://wiki.vg/Protocol#Type:String
 
-func ReadString(r io.Reader) (value string, err error) {
+func readString(r io.Reader) (value string, err error) {
 	var len int32
 	var buf []byte
 
-	len, err = ReadVarInt(r)
+	len, err = readVarInt(r)
 	if err != nil {
 		return "", err
 	}
@@ -23,10 +23,10 @@ func ReadString(r io.Reader) (value string, err error) {
 	return string(buf), nil
 }
 
-func WriteString(w io.Writer, value string) (err error) {
+func writeString(w io.Writer, value string) (err error) {
 	var len int = len(value)
 
-	err = WriteVarInt(w, int32(len))
+	err = writeVarInt(w, int32(len))
 	if err != nil {
 		return err
 	}

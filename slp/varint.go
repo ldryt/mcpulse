@@ -1,4 +1,4 @@
-package utils
+package slp
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ const (
 	continueBit int32 = 0x80
 )
 
-func ReadVarInt(r io.Reader) (value int32, err error) {
+func readVarInt(r io.Reader) (value int32, err error) {
 	var position int
 	var currentByte []byte = make([]byte, 1)
 
@@ -31,14 +31,14 @@ func ReadVarInt(r io.Reader) (value int32, err error) {
 		position += 7
 
 		if position >= 32 {
-			return 0, errors.New("VarInt too big")
+			return 0, errors.New("varint too big")
 		}
 	}
 
 	return value, nil
 }
 
-func WriteVarInt(w io.Writer, value int32) (err error) {
+func writeVarInt(w io.Writer, value int32) (err error) {
 	for {
 		if (value & ^segmentBits) == 0 {
 			_, err = w.Write([]byte{byte(value)})
@@ -54,7 +54,7 @@ func WriteVarInt(w io.Writer, value int32) (err error) {
 	}
 }
 
-func VarIntSize(value int32) (size int) {
+func sizeVarInt(value int32) (size int) {
 	for {
 		size++
 		value >>= 7

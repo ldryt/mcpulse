@@ -1,4 +1,4 @@
-package utils
+package slp
 
 import (
 	"bytes"
@@ -73,7 +73,7 @@ func TestReadVarInt(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := bytes.NewReader(tt.VarInt)
 
-			got, err := ReadVarInt(r)
+			got, err := readVarInt(r)
 			if err != nil {
 				t.Error("An error occurred:", err)
 				return
@@ -91,7 +91,7 @@ func TestWriteVarInt(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var buf bytes.Buffer
 
-			err := WriteVarInt(&buf, tt.FixedInt)
+			err := writeVarInt(&buf, tt.FixedInt)
 			if err != nil {
 				t.Error("An error occurred:", err)
 				return

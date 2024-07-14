@@ -1,7 +1,8 @@
-package main
+package config
 
 import (
 	"encoding/base64"
+	"flag"
 	"fmt"
 	"os"
 
@@ -24,25 +25,35 @@ type Config struct {
 	} `yaml:"slp"`
 }
 
-func LoadConfig(path string) (conf Config, err error) {
-	yamlFile, err := os.ReadFile(path)
+var cfg *Config
+
+func Get() *Config {
+	return cfg
+}
+
+func Load() (err error) {
+	configPathPTR := flag.String("config", "./config.yml", "a path to the configuration file")
+	flag.Parse()
+	configPath := *configPathPTR
+
+	yamlFile, err := os.ReadFile(configPath)
 	if err != nil {
-		return Config{}, fmt.Errorf("couldn't load config: %v", err)
+		return fmt.Errorf("error loading config: %v", err)
 	}
 
-	err = yaml.Unmarshal(yamlFile, &conf)
+	err = yaml.Unmarshal(yamlFile, &cfg)
 	if err != nil {
-		return Config{}, fmt.Errorf("couldn't parse config: %v", err)
+		return fmt.Errorf("error parsing config: %v", err)
 	}
 
-	if conf.SLP.FaviconPath != "" {
-		conf.SLP.FaviconB64, err = encodeFavicon(conf.SLP.FaviconPath)
+	if cfg.SLP.FaviconPath != "" {
+		cfg.SLP.FaviconB64, err = encodeFavicon(cfg.SLP.FaviconPath)
 		if err != nil {
-			return Config{}, fmt.Errorf("couldn't encode favicon: %v", err)
+			return fmt.Errorf("error encoding favicon: %v", err)
 		}
 	}
 
-	return conf, nil
+	return nil
 }
 
 func encodeFavicon(path string) (result string, err error) {

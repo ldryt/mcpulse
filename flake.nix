@@ -24,9 +24,9 @@
         {
           default = pkgs.buildGoModule {
             pname = "mcpulse";
-            version = "0.5.3";
+            version = "0.6.0";
 
-            src = ./src;
+            src = ./.;
 
             vendorHash = "sha256-g+yaVIx4jxpAQ/+WrGKxhVeliYx7nLQe/zsGpxV4Fn4=";
           };
