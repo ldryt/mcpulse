@@ -22,7 +22,7 @@
           pkgs = import nixpkgs { inherit system; };
         in
         {
-          mcpulse = pkgs.buildGoModule {
+          default = pkgs.buildGoModule {
             pname = "mcpulse";
             version = "0.5.2";
 
