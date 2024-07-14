@@ -100,15 +100,15 @@ func sendStatusResponse(w io.Writer) (err error) {
 			Name     string `json:"name"`
 			Protocol int    `json:"protocol"`
 		}{
-			Name:     GlobalConfig.Version.Name,
-			Protocol: GlobalConfig.Version.Protocol,
+			Name:     GlobalConfig.SLP.Version.Name,
+			Protocol: GlobalConfig.SLP.Version.Protocol,
 		},
 		Description: struct {
 			Text string `json:"text"`
 		}{
-			Text: GlobalConfig.Motds.NotStarted,
+			Text: GlobalConfig.SLP.Motd,
 		},
-		Favicon: GlobalConfig.FaviconB64,
+		Favicon: GlobalConfig.SLP.FaviconB64,
 	}
 
 	srMarshalled, err = json.Marshal(sr)

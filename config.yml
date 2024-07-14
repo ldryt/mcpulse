@@ -1,11 +1,10 @@
-listen-address: "0.0.0.0:25565"
+slp:
+  listen-address: "0.0.0.0:25565"
+  version:
+    name: "1.21"
+    protocol: 767
+  motd: "Click here to start the server"
+  favicon: "./favicon.png"
 
-version:
-  name: "1.21"
-  protocol: 767
-
-motds:
-  not_started: "Click here to start the server"
-  starting: "Please wait..."
-
-favicon: "./favicon.png"
+announcer:
+  listen-address: "0.0.0.0:9065"

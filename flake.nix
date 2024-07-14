@@ -24,7 +24,7 @@
         {
           default = pkgs.buildGoModule {
             pname = "mcpulse";
-            version = "0.5.2";
+            version = "0.5.3";
 
             src = ./src;
 

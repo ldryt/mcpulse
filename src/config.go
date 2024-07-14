@@ -9,20 +9,19 @@ import (
 )
 
 type Config struct {
-	ListenAddress string `yaml:"listen-address"`
+	SLP struct {
+		ListenAddress string `yaml:"listen-address"`
 
-	Version struct {
-		Name     string `yaml:"name"`
-		Protocol int    `yaml:"protocol"`
-	} `yaml:"version"`
+		Version struct {
+			Name     string `yaml:"name"`
+			Protocol int    `yaml:"protocol"`
+		} `yaml:"version"`
 
-	Motds struct {
-		NotStarted string `yaml:"not_started"`
-		Starting   string `yaml:"starting"`
-	}
+		Motd string `yaml:"motd"`
 
-	FaviconPath string `yaml:"favicon"`
-	FaviconB64  string
+		FaviconPath string `yaml:"favicon"`
+		FaviconB64  string
+	} `yaml:"slp"`
 }
 
 func LoadConfig(path string) (conf Config, err error) {
@@ -36,8 +35,8 @@ func LoadConfig(path string) (conf Config, err error) {
 		return Config{}, fmt.Errorf("couldn't parse config: %v", err)
 	}
 
-	if conf.FaviconPath != "" {
-		conf.FaviconB64, err = encodeFavicon(conf.FaviconPath)
+	if conf.SLP.FaviconPath != "" {
+		conf.SLP.FaviconB64, err = encodeFavicon(conf.SLP.FaviconPath)
 		if err != nil {
 			return Config{}, fmt.Errorf("couldn't encode favicon: %v", err)
 		}

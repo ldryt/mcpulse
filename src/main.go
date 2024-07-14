@@ -19,13 +19,17 @@ func main() {
 		log.Fatalln("An error occurred while loading configuration:", err)
 	}
 
-	listener, err := net.Listen("tcp4", GlobalConfig.ListenAddress)
+	go listenTCP4("SLP", GlobalConfig.SLP.ListenAddress)
+}
+
+func listenTCP4(name string, address string) {
+	listener, err := net.Listen("tcp4", address)
 	if err != nil {
-		log.Fatalln("An error occurred while creating listener:", err)
+		log.Fatalf("An error occurred while creating listener '%v' (%v): %v\n", name, address, err)
 	}
 	defer listener.Close()
 
-	log.Println("Server listening on", listener.Addr())
+	log.Printf("Server '%v' listening on %v\n", name, listener.Addr())
 
 	for {
 		conn, err := listener.Accept()
