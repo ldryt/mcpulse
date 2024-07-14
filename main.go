@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/ldryt/mcpulse/announcer"
 	"github.com/ldryt/mcpulse/config"
 	"github.com/ldryt/mcpulse/slp"
 )
@@ -15,8 +16,8 @@ func main() {
 		log.Fatalln("Error loading configuration:", err)
 	}
 
-	go listenTCP4("SLP", config.Get().SLP.ListenAddress, slp.HandleConnection)
-	// go listenTCP4("Announcer", config.Get().Announcer.ListenAddress, announcer.HandleConnection)
+	go listenTCP4("ServerListPing", config.Get().SLP.ListenAddress, slp.HandleConnection)
+	go listenTCP4("Announcer", config.Get().Announcer.ListenAddress, announcer.HandleConnection)
 
 	select {}
 }

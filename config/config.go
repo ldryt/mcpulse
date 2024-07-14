@@ -23,6 +23,9 @@ type Config struct {
 		FaviconPath string `yaml:"favicon"`
 		FaviconB64  string
 	} `yaml:"slp"`
+	Announcer struct {
+		ListenAddress string `yaml:"listen-address"`
+	} `yaml:"announcer"`
 }
 
 var cfg *Config
