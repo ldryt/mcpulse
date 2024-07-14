@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+
+	"github.com/ldryt/mcpulse/announcer"
 )
 
 func HandleConnection(conn net.Conn) {
@@ -80,6 +82,8 @@ func handleLogin(conn net.Conn) {
 		player.Name,
 		toUUID(player.UUID.MSB, player.UUID.LSB),
 	)
+
+	announcer.AddStartRequest(toUUID(player.UUID.MSB, player.UUID.LSB))
 
 	err = sendDisconnect(conn)
 	if err != nil {
