@@ -8,4 +8,4 @@ motds:
   not_started: "Click here to start the server"
   starting: "Please wait..."
 
-favicon: "./config/favicon.png"
+favicon: "./favicon.png"
