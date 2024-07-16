@@ -4,8 +4,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/ldryt/mcpulse/announcer"
 	"github.com/ldryt/mcpulse/config"
+	"github.com/ldryt/mcpulse/pulser"
 	"github.com/ldryt/mcpulse/slp"
 )
 
@@ -17,7 +17,7 @@ func main() {
 	}
 
 	go listenTCP4("ServerListPing", config.Get().SLP.ListenAddress, slp.HandleConnection)
-	go listenTCP4("Announcer", config.Get().Announcer.ListenAddress, announcer.HandleConnection)
+	go listenTCP4("Pulser", config.Get().Pulser.ListenAddress, pulser.HandleConnection)
 
 	select {}
 }

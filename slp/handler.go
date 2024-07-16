@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/ldryt/mcpulse/announcer"
+	"github.com/ldryt/mcpulse/pulser"
 )
 
 func HandleConnection(conn net.Conn) {
@@ -83,7 +83,7 @@ func handleLogin(conn net.Conn) {
 		toUUID(player.UUID.MSB, player.UUID.LSB),
 	)
 
-	announcer.AddStartRequest(toUUID(player.UUID.MSB, player.UUID.LSB))
+	pulser.AddStartRequest(toUUID(player.UUID.MSB, player.UUID.LSB))
 
 	err = sendDisconnect(conn)
 	if err != nil {

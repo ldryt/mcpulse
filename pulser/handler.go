@@ -1,4 +1,4 @@
-package announcer
+package pulser
 
 import (
 	"log"
@@ -13,7 +13,7 @@ func HandleConnection(conn net.Conn) {
 
 	log.Printf("Connection established with %v", conn.RemoteAddr())
 
-	go writeAnnouncements(conn, 3)
+	go pulse(conn, 3)
 	go readUpdates(conn)
 
 	select {}

@@ -23,9 +23,9 @@ type Config struct {
 		FaviconPath string `yaml:"favicon"`
 		FaviconB64  string
 	} `yaml:"slp"`
-	Announcer struct {
+	Pulser struct {
 		ListenAddress string `yaml:"listen-address"`
-	} `yaml:"announcer"`
+	} `yaml:"pulser"`
 }
 
 var cfg *Config

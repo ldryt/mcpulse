@@ -1,4 +1,4 @@
-package announcer
+package pulser
 
 import (
 	"encoding/json"
@@ -27,7 +27,7 @@ func AddStartRequest(UUID string) {
 	container.StartRequests = append(container.StartRequests, newStartRequest)
 }
 
-func writeAnnouncements(w io.Writer, tick time.Duration) {
+func pulse(w io.Writer, tick time.Duration) {
 	ticker := time.NewTicker(tick * time.Second)
 	defer ticker.Stop()
 
