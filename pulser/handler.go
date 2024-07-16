@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -19,6 +20,8 @@ func HandleConnection(conn net.Conn) {
 		conn.Close()
 	}()
 
+	wg := new(sync.WaitGroup)
+
 	_ = conn.SetDeadline(time.Now().Add(ReadWriteTimeout))
 
 	lim := io.LimitReader(conn, MaxReadBytes)
@@ -28,8 +31,11 @@ func HandleConnection(conn net.Conn) {
 
 	log.Printf("Connection established with %v", conn.RemoteAddr())
 
-	go pulse(w, 3)
-	go readUpdates(r)
+	wg.Add(1)
+	go pulse(w, 3, wg)
 
-	select {}
+	wg.Add(1)
+	go readUpdates(r, wg)
+
+	wg.Wait()
 }
