@@ -7,17 +7,23 @@ import (
 	"io"
 	"log"
 	"net"
+	"time"
 
 	"github.com/ldryt/mcpulse/pulser"
 )
 
-const MaxReadBytes int64 = 4096
+const (
+	MaxReadBytes     int64         = 4096
+	ReadWriteTimeout time.Duration = 20 * time.Second
+)
 
 func HandleConnection(conn net.Conn) {
 	defer func() {
 		log.Printf("Connection closed")
 		conn.Close()
 	}()
+
+	_ = conn.SetDeadline(time.Now().Add(ReadWriteTimeout))
 
 	lim := io.LimitReader(conn, MaxReadBytes)
 	r := bufio.NewReader(lim)
