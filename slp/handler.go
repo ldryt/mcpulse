@@ -28,8 +28,7 @@ func HandleConnection(conn net.Conn) {
 	lim := io.LimitReader(conn, MaxReadBytes)
 	r := bufio.NewReader(lim)
 
-	w := bufio.NewWriter(conn)
-	defer w.Flush()
+	w := io.Writer(conn)
 
 	log.Printf("Connection established")
 
