@@ -2,7 +2,9 @@ package slp
 
 import (
 	"bytes"
+	"errors"
 	"io"
+	"math"
 )
 
 // https://wiki.vg/Protocol#Packet_format
@@ -19,15 +21,24 @@ func readPacket(r io.Reader) (p Packet, err error) {
 	if err != nil {
 		return Packet{}, err
 	}
+	if sizeVarInt(PacketLength) > 3 {
+		return Packet{}, errors.New("packet length field must not be longer than 3 bytes")
+	}
 
 	p.ID, err = readVarInt(r)
 	if err != nil {
 		return Packet{}, err
 	}
 
-	_, err = io.CopyN(&p.Data, r, int64(PacketLength-int32(sizeVarInt(p.ID))))
+	n, err := io.CopyN(&p.Data, r, int64(PacketLength-int32(sizeVarInt(p.ID))))
 	if err != nil {
 		return Packet{}, err
+	}
+	if n != int64(PacketLength-int32(sizeVarInt(p.ID))) {
+		return Packet{}, errors.New("packet length differs from read length")
+	}
+	if n+int64(sizeVarInt(PacketLength)+sizeVarInt(p.ID)) >= int64(math.Pow(2, 21)) {
+		return Packet{}, errors.New("packets cannot be larger than 2^21 - 1 bytes")
 	}
 
 	return p, nil

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"sync"
 	"time"
 )
 
@@ -27,7 +28,9 @@ func AddStartRequest(UUID string) {
 	container.StartRequests = append(container.StartRequests, newStartRequest)
 }
 
-func pulse(w io.Writer, tick time.Duration) {
+func pulse(w io.Writer, tick time.Duration, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	ticker := time.NewTicker(tick * time.Second)
 	defer ticker.Stop()
 
@@ -36,12 +39,14 @@ func pulse(w io.Writer, tick time.Duration) {
 		err := encoder.Encode(container)
 		if err != nil {
 			log.Printf("error sending announcement: %v", err)
-			break
+			return
 		}
 	}
 }
 
-func readUpdates(r io.Reader) {
+func readUpdates(r io.Reader, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	decoder := json.NewDecoder(r)
 	for {
 		var msg _StartRequest
@@ -50,7 +55,7 @@ func readUpdates(r io.Reader) {
 			continue
 		} else {
 			log.Println("error decoding update message:", err)
-			break
+			return
 		}
 	}
 }
