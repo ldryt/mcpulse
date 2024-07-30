@@ -37,7 +37,7 @@ type StatusResponse struct {
 	Favicon string `json:"favicon"`
 }
 
-func handleHandshake(r io.Reader) (h HandshakeData, err error) {
+func HandleHandshake(r io.Reader) (h HandshakeData, err error) {
 	var p Packet
 
 	p, err = readPacket(r)
@@ -74,7 +74,7 @@ func handleHandshake(r io.Reader) (h HandshakeData, err error) {
 	return h, nil
 }
 
-func handleStatusRequest(r io.Reader) (err error) {
+func HandleStatusRequest(r io.Reader) (err error) {
 	var p Packet
 
 	p, err = readPacket(r)
@@ -88,7 +88,7 @@ func handleStatusRequest(r io.Reader) (err error) {
 	return nil
 }
 
-func sendStatusResponse(w io.Writer) (err error) {
+func SendStatusResponse(w io.Writer) (err error) {
 	var p Packet
 	var sr StatusResponse
 	var srMarshalled []byte
@@ -101,15 +101,15 @@ func sendStatusResponse(w io.Writer) (err error) {
 			Name     string `json:"name"`
 			Protocol int    `json:"protocol"`
 		}{
-			Name:     cfg.SLP.Version.Name,
-			Protocol: cfg.SLP.Version.Protocol,
+			Name:     cfg.Version.Name,
+			Protocol: cfg.Version.Protocol,
 		},
 		Description: struct {
 			Text string `json:"text"`
 		}{
-			Text: cfg.SLP.Motd,
+			Text: cfg.Motd,
 		},
-		Favicon: cfg.SLP.FaviconB64,
+		Favicon: cfg.FaviconB64,
 	}
 
 	srMarshalled, err = json.Marshal(sr)
@@ -130,7 +130,7 @@ func sendStatusResponse(w io.Writer) (err error) {
 	return nil
 }
 
-func handlePingRequest(r io.Reader) (pl int64, err error) {
+func HandlePingRequest(r io.Reader) (pl int64, err error) {
 	var p Packet
 
 	p, err = readPacket(r)
@@ -149,7 +149,7 @@ func handlePingRequest(r io.Reader) (pl int64, err error) {
 	return pl, nil
 }
 
-func sendPongResponse(w io.Writer, pl int64) (err error) {
+func SendPongResponse(w io.Writer, pl int64) (err error) {
 	var p Packet
 
 	p.ID = 1
@@ -167,7 +167,7 @@ func sendPongResponse(w io.Writer, pl int64) (err error) {
 	return nil
 }
 
-func handleLoginStart(r io.Reader) (pr PlayerData, err error) {
+func HandleLoginStart(r io.Reader) (pr PlayerData, err error) {
 	var p Packet
 
 	p, err = readPacket(r)
@@ -195,7 +195,7 @@ func handleLoginStart(r io.Reader) (pr PlayerData, err error) {
 	return pr, nil
 }
 
-func sendDisconnect(w io.Writer) (err error) {
+func SendDisconnect(w io.Writer) (err error) {
 	var p Packet
 
 	p.ID = 0
