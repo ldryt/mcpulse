@@ -1,5 +1,3 @@
-// https://wiki.vg/Server_List_Ping
-
 package slp
 
 import (
@@ -10,6 +8,8 @@ import (
 
 	"github.com/ldryt/mcpulse/config"
 )
+
+// https://wiki.vg/Server_List_Ping
 
 type HandshakeData struct {
 	ProtocolVersion int32
@@ -195,12 +195,12 @@ func HandleLoginStart(r io.Reader) (pr PlayerData, err error) {
 	return pr, nil
 }
 
-func SendDisconnect(w io.Writer) (err error) {
+func SendDisconnect(w io.Writer, reason string) (err error) {
 	var p Packet
 
 	p.ID = 0
 
-	err = writeString(&p.Data, "No")
+	err = writeString(&p.Data, reason)
 	if err != nil {
 		return err
 	}

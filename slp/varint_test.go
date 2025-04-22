@@ -6,6 +6,7 @@ import (
 )
 
 // https://wiki.vg/Protocol#VarInt_and_VarLong
+
 var tests = []struct {
 	name     string
 	VarInt   []byte

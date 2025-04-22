@@ -125,7 +125,7 @@ func handleLogin(r io.Reader, w io.Writer) {
 		toUUID(player.UUID.MSB, player.UUID.LSB),
 	)
 
-	err = slp.SendDisconnect(w)
+	err = slp.SendDisconnect(w, "Login successful.")
 	if err != nil {
 		log.Printf("Error sending disconnect: %v", err)
 		return
