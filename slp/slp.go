@@ -6,6 +6,8 @@ import (
 	"errors"
 	"io"
 
+	"github.com/google/uuid"
+
 	"github.com/ldryt/mcpulse/config"
 )
 
@@ -21,8 +23,8 @@ type HandshakeData struct {
 type PlayerData struct {
 	Name string
 	UUID struct {
-		MSB uint64
-		LSB uint64
+		Repr     uuid.UUID
+		MSB, LSB uint64
 	}
 }
 
@@ -218,6 +220,9 @@ func HandleLoginStart(r io.Reader) (pr PlayerData, err error) {
 	if err != nil {
 		return PlayerData{}, err
 	}
+
+	binary.BigEndian.PutUint64(pr.UUID.Repr[:8], uint64(pr.UUID.MSB))
+	binary.BigEndian.PutUint64(pr.UUID.Repr[8:16], uint64(pr.UUID.LSB))
 
 	return pr, nil
 }

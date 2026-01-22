@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"io"
-	"log"
 	"net"
 	"time"
 
@@ -19,12 +18,11 @@ type Gateway struct {
 }
 
 type ConnectionInfo struct {
-	bi               BackendInfo
-	clientConn       net.Conn
-	hd               slp.HandshakeData
-	username         string
-	clientReader     io.Reader
-	uuidMSB, uuidLSB uint64
+	session      *Session
+	bi           BackendInfo
+	clientReader io.Reader
+	clientConn   net.Conn
+	hd           slp.HandshakeData
 }
 
 type BackendInfo struct {
@@ -37,35 +35,55 @@ func New(cfg *config.Config) *Gateway {
 }
 
 func (gw *Gateway) proxyConnection(c ConnectionInfo) {
-	log.Printf("[%s] Dialing backend %s...", c.username, c.bi.destAddr)
+	s := c.session
+
 	backendConn, err := net.DialTimeout("tcp", c.bi.destAddr, BackendDialTimeout)
 	if err != nil {
-		log.Printf("Backend unreachable: %v", err)
+		s.Error("while reaching backend [%s]: %v", c.bi.destAddr, err)
 		return
 	}
 	defer backendConn.Close()
 
 	if err := slp.SendHandshake(backendConn, c.hd); err != nil {
-		log.Printf("Error sending handshake: %v", err)
+		s.Error("while sending Handshake to backend [%s]: %v", c.bi.destAddr, err)
 		return
 	}
-
-	if err := slp.SendLoginStart(backendConn, c.username, c.uuidMSB, c.uuidLSB); err != nil {
-		log.Printf("Error sending login start: %v", err)
+	if err := slp.SendLoginStart(backendConn, s.User.Name, s.User.UUID.MSB, s.User.UUID.LSB); err != nil {
+		s.Error("while sending LoginStart to backend [%s]: %v", c.bi.destAddr, err)
 		return
 	}
-
-	log.Printf("[%s] Proxying...", c.username)
-
+	s.Log("Successfully authenticated to backend [%s].", c.bi.destAddr)
 	c.clientConn.SetDeadline(time.Time{})
 
-	done := make(chan struct{})
+	s.Log("Tunnel started.")
+	serverClosed := make(chan error, 1)
+	clientClosed := make(chan error, 1)
 	go func() {
-		defer close(done)
-		io.Copy(c.clientConn, backendConn)
+		_, err := io.Copy(c.clientConn, backendConn)
+		serverClosed <- err
+	}()
+	go func() {
+		_, err := io.Copy(backendConn, io.MultiReader(c.clientReader, c.clientConn))
+		clientClosed <- err
 	}()
 
-	io.Copy(backendConn, io.MultiReader(c.clientReader, c.clientConn))
+	select {
+	case err := <-clientClosed:
+		if err != nil {
+			s.Warn("Client connection error: %v", err)
+		} else {
+			s.Log("Client quitted.")
+		}
+		backendConn.Close()
 
-	<-done
+	case err := <-serverClosed:
+		if err != nil {
+			s.Warn("Backend connection error: %v", err)
+		} else {
+			s.Log("Backend server closed connection.")
+		}
+		c.clientConn.Close()
+	}
+
+	s.Log("Stopped tunnelling.")
 }
