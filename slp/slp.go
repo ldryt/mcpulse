@@ -74,6 +74,33 @@ func HandleHandshake(r io.Reader) (h HandshakeData, err error) {
 	return h, nil
 }
 
+func SendHandshake(w io.Writer, h HandshakeData) error {
+	var p Packet
+	p.ID = 0x00
+
+	err := writeVarInt(&p.Data, h.ProtocolVersion)
+	if err != nil {
+		return err
+	}
+
+	err = writeString(&p.Data, h.ServerAddress)
+	if err != nil {
+		return err
+	}
+
+	err = binary.Write(&p.Data, binary.BigEndian, h.ServerPort)
+	if err != nil {
+		return err
+	}
+
+	err = writeVarInt(&p.Data, h.NextState)
+	if err != nil {
+		return err
+	}
+
+	return sendPacket(w, p)
+}
+
 func HandleStatusRequest(r io.Reader) (err error) {
 	var p Packet
 
@@ -193,6 +220,27 @@ func HandleLoginStart(r io.Reader) (pr PlayerData, err error) {
 	}
 
 	return pr, nil
+}
+
+func SendLoginStart(w io.Writer, name string, uuidMSB, uuidLSB uint64) error {
+	var p Packet
+	p.ID = 0x00
+
+	err := writeString(&p.Data, name)
+	if err != nil {
+		return err
+	}
+
+	err = binary.Write(&p.Data, binary.BigEndian, uuidMSB)
+	if err != nil {
+		return err
+	}
+	err = binary.Write(&p.Data, binary.BigEndian, uuidLSB)
+	if err != nil {
+		return err
+	}
+
+	return sendPacket(w, p)
 }
 
 func SendDisconnect(w io.Writer, reason string) (err error) {
