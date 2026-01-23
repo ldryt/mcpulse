@@ -12,15 +12,14 @@ import (
 type Config struct {
 	ListenAddress string `yaml:"listen-address"`
 
-	Version struct {
-		Name     string `yaml:"name"`
-		Protocol int    `yaml:"protocol"`
-	} `yaml:"version"`
-
-	Motd string `yaml:"motd"`
-
+	Motd        string `yaml:"motd"`
 	FaviconPath string `yaml:"favicon"`
 	FaviconB64  string
+
+	LoginFlow struct {
+		WelcomeMessage         string `yaml:"welcome-msg"`
+		BackendNotReadyMessage string `yaml:"backend-not-ready-msg"`
+	} `yaml:"login-flow"`
 }
 
 var cfg *Config

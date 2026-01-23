@@ -1,6 +1,6 @@
 listen-address: "0.0.0.0:25566"
-version:
-  name: "1.21"
-  protocol: 767
-motd: "Click here to start the server"
+motd: "Click here to start your own custom server!"
 favicon: "./favicon.png"
+login-flow:
+  welcome-msg: "Welcome!\nTo start playing, please register using this secret link:\n%s"
+  backend-not-ready-msg: "§eServer is starting...\n§7Please wait %s"

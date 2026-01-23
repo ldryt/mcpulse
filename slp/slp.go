@@ -31,7 +31,7 @@ type PlayerData struct {
 type StatusResponse struct {
 	Version struct {
 		Name     string `json:"name"`
-		Protocol int    `json:"protocol"`
+		Protocol int32  `json:"protocol"`
 	} `json:"version"`
 	Description struct {
 		Text string `json:"text"`
@@ -117,7 +117,7 @@ func HandleStatusRequest(r io.Reader) (err error) {
 	return nil
 }
 
-func SendStatusResponse(w io.Writer) (err error) {
+func SendStatusResponse(w io.Writer, protocol int32) (err error) {
 	var p Packet
 	var sr StatusResponse
 	var srMarshalled []byte
@@ -128,10 +128,10 @@ func SendStatusResponse(w io.Writer) (err error) {
 	sr = StatusResponse{
 		Version: struct {
 			Name     string `json:"name"`
-			Protocol int    `json:"protocol"`
+			Protocol int32  `json:"protocol"`
 		}{
-			Name:     cfg.Version.Name,
-			Protocol: cfg.Version.Protocol,
+			Name:     "",
+			Protocol: protocol,
 		},
 		Description: struct {
 			Text string `json:"text"`

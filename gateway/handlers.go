@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"net"
 	"time"
@@ -43,21 +44,50 @@ func (gw *Gateway) HandleConnection(conn net.Conn) {
 
 	switch hd.NextState {
 	case 1:
-		gw.handleStatus(s, r, w)
+		gw.handleStatus(s, r, w, hd.ProtocolVersion)
+		return
 	case 2:
-		gw.handleLogin(s, conn, r, w, hd)
+		gw.handleLogin(s, r, w)
 	default:
 		s.Error("while parsing NextState %d", hd.NextState)
+		return
 	}
+
+	if !s.Authed {
+		s.Warn("User is not authenticated.")
+		if err := slp.SendDisconnect(w, fmt.Sprintf(gw.Config.LoginFlow.WelcomeMessage, "https://mcpulse.ldryt.dev/abc")); err != nil {
+			s.Error("while sending Disconnect: %v", err)
+		}
+		return
+	}
+
+	backend := BackendInfo{destAddr: "127.0.0.1:25565", ready: false}
+	if !backend.ready {
+		s.Warn("Backend is not ready.")
+		if err := slp.SendDisconnect(w, fmt.Sprintf(gw.Config.LoginFlow.BackendNotReadyMessage, "(ETA: 1m4s)")); err != nil {
+			s.Error("while sending Disconnect: %v", err)
+		}
+		return
+	}
+
+	gw.proxyConnection(
+		ConnectionInfo{
+			session:      s,
+			bi:           backend,
+			clientConn:   conn,
+			clientReader: r,
+			hd:           hd,
+		},
+	)
 }
 
-func (gw *Gateway) handleStatus(s *Session, r io.Reader, w io.Writer) {
+func (gw *Gateway) handleStatus(s *Session, r io.Reader, w io.Writer, protocol int32) {
 	if err := slp.HandleStatusRequest(r); err != nil {
 		s.Error("while handling Status: %v", err)
 		return
 	}
 
-	if err := slp.SendStatusResponse(w); err != nil {
+	if err := slp.SendStatusResponse(w, protocol); err != nil {
 		s.Error("while sending Status: %v", err)
 		return
 	}
@@ -75,28 +105,14 @@ func (gw *Gateway) handleStatus(s *Session, r io.Reader, w io.Writer) {
 	}
 }
 
-func (gw *Gateway) handleLogin(s *Session, conn net.Conn, r io.Reader, w io.Writer, hd slp.HandshakeData) {
+func (gw *Gateway) handleLogin(s *Session, r io.Reader, w io.Writer) {
 	if u, err := slp.HandleLoginStart(r); err != nil {
 		s.Error("while reading LoginStart: %v", err)
 		return
 	} else {
 		s.User = u
-		s.Log("[Username: %s] [UUID: %s]", s.User.Name, s.User.UUID.Repr.String())
 	}
 
-	backend := BackendInfo{destAddr: "127.0.0.1:25565", ready: true}
-	if !backend.ready {
-		slp.SendDisconnect(w, "§eTon serveur démarre...\n§7Reviens dans 20 secondes !")
-		return
-	}
-
-	gw.proxyConnection(
-		ConnectionInfo{
-			session:      s,
-			bi:           backend,
-			clientConn:   conn,
-			clientReader: r,
-			hd:           hd,
-		},
-	)
+	s.Log("[Username: %s] [UUID: %s]", s.User.Name, s.User.UUID.Repr.String())
+	s.Authed = true
 }
