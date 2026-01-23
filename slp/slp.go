@@ -250,10 +250,18 @@ func SendLoginStart(w io.Writer, name string, uuidMSB, uuidLSB uint64) error {
 
 func SendDisconnect(w io.Writer, reason string) (err error) {
 	var p Packet
+	p.ID = 0x00
 
-	p.ID = 0
+	rsMarshalled, err := json.Marshal(struct {
+		Text string `json:"text"`
+	}{
+		Text: reason,
+	})
+	if err != nil {
+		return err
+	}
 
-	err = writeString(&p.Data, reason)
+	err = writeString(&p.Data, string(rsMarshalled))
 	if err != nil {
 		return err
 	}
