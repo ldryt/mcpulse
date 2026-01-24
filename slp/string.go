@@ -4,7 +4,7 @@ import "io"
 
 // https://wiki.vg/Protocol#Type:String
 
-func readString(r io.Reader) (value string, err error) {
+func readString(r PacketReader) (value string, err error) {
 	var len int32
 	var buf []byte
 

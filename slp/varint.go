@@ -12,19 +12,18 @@ const (
 	continueBit int32 = 0x80
 )
 
-func readVarInt(r io.Reader) (value int32, err error) {
+func readVarInt(r PacketReader) (value int32, err error) {
 	var position int
-	var currentByte []byte = make([]byte, 1)
 
 	for {
-		_, err = r.Read(currentByte)
+		currentByte, err := r.ReadByte()
 		if err != nil {
 			return 0, err
 		}
 
-		value |= int32(currentByte[0]) & segmentBits << position
+		value |= int32(currentByte) & segmentBits << position
 
-		if (int32(currentByte[0]) & continueBit) == 0 {
+		if (int32(currentByte) & continueBit) == 0 {
 			break
 		}
 

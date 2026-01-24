@@ -81,7 +81,7 @@ func (gw *Gateway) HandleConnection(conn net.Conn) {
 	)
 }
 
-func (gw *Gateway) handleStatus(s *Session, r io.Reader, w io.Writer, protocol int32) {
+func (gw *Gateway) handleStatus(s *Session, r slp.PacketReader, w io.Writer, protocol int32) {
 	if err := slp.HandleStatusRequest(r); err != nil {
 		s.Error("while handling Status: %v", err)
 		return
@@ -105,7 +105,7 @@ func (gw *Gateway) handleStatus(s *Session, r io.Reader, w io.Writer, protocol i
 	}
 }
 
-func (gw *Gateway) handleLogin(s *Session, r io.Reader, w io.Writer) {
+func (gw *Gateway) handleLogin(s *Session, r slp.PacketReader, w io.Writer) {
 	if u, err := slp.HandleLoginStart(r); err != nil {
 		s.Error("while reading LoginStart: %v", err)
 		return

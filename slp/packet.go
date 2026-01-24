@@ -14,7 +14,12 @@ type Packet struct {
 	Data bytes.Buffer
 }
 
-func readPacket(r io.Reader) (p Packet, err error) {
+type PacketReader interface {
+	io.Reader
+	io.ByteReader
+}
+
+func readPacket(r PacketReader) (p Packet, err error) {
 	var PacketLength int32
 
 	PacketLength, err = readVarInt(r)

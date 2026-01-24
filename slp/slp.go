@@ -39,7 +39,7 @@ type StatusResponse struct {
 	Favicon string `json:"favicon"`
 }
 
-func HandleHandshake(r io.Reader) (h HandshakeData, err error) {
+func HandleHandshake(r PacketReader) (h HandshakeData, err error) {
 	var p Packet
 
 	p, err = readPacket(r)
@@ -103,7 +103,7 @@ func SendHandshake(w io.Writer, h HandshakeData) error {
 	return sendPacket(w, p)
 }
 
-func HandleStatusRequest(r io.Reader) (err error) {
+func HandleStatusRequest(r PacketReader) (err error) {
 	var p Packet
 
 	p, err = readPacket(r)
@@ -159,7 +159,7 @@ func SendStatusResponse(w io.Writer, protocol int32) (err error) {
 	return nil
 }
 
-func HandlePingRequest(r io.Reader) (pl int64, err error) {
+func HandlePingRequest(r PacketReader) (pl int64, err error) {
 	var p Packet
 
 	p, err = readPacket(r)
@@ -196,7 +196,7 @@ func SendPongResponse(w io.Writer, pl int64) (err error) {
 	return nil
 }
 
-func HandleLoginStart(r io.Reader) (pr PlayerData, err error) {
+func HandleLoginStart(r PacketReader) (pr PlayerData, err error) {
 	var p Packet
 
 	p, err = readPacket(r)
