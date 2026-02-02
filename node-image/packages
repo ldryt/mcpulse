@@ -1,0 +1,13 @@
+bubblewrap
+cloud-init
+mount
+eudev
+e2fsprogs
+e2fsprogs-extra
+curl
+zip
+openjdk8-jre-base
+openjdk11-jre-headless
+openjdk17-jre-headless
+openjdk21-jre-headless
+openjdk25-jre-headless

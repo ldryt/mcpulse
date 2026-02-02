@@ -42,7 +42,7 @@ type StatusResponse struct {
 func HandleHandshake(r PacketReader) (h HandshakeData, err error) {
 	var p Packet
 
-	p, err = readPacket(r)
+	p, err = ReadPacket(r)
 	if err != nil {
 		return HandshakeData{}, err
 	}
@@ -55,7 +55,7 @@ func HandleHandshake(r PacketReader) (h HandshakeData, err error) {
 		return HandshakeData{}, err
 	}
 
-	h.ServerAddress, err = readString(&p.Data)
+	h.ServerAddress, err = ReadString(&p.Data)
 	if err != nil {
 		return HandshakeData{}, err
 	}
@@ -85,7 +85,7 @@ func SendHandshake(w io.Writer, h HandshakeData) error {
 		return err
 	}
 
-	err = writeString(&p.Data, h.ServerAddress)
+	err = WriteString(&p.Data, h.ServerAddress)
 	if err != nil {
 		return err
 	}
@@ -100,13 +100,13 @@ func SendHandshake(w io.Writer, h HandshakeData) error {
 		return err
 	}
 
-	return sendPacket(w, p)
+	return SendPacket(w, p)
 }
 
 func HandleStatusRequest(r PacketReader) (err error) {
 	var p Packet
 
-	p, err = readPacket(r)
+	p, err = ReadPacket(r)
 	if err != nil {
 		return err
 	}
@@ -146,12 +146,12 @@ func SendStatusResponse(w io.Writer, protocol int32) (err error) {
 		return err
 	}
 
-	err = writeString(&p.Data, string(srMarshalled))
+	err = WriteString(&p.Data, string(srMarshalled))
 	if err != nil {
 		return err
 	}
 
-	err = sendPacket(w, p)
+	err = SendPacket(w, p)
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func SendStatusResponse(w io.Writer, protocol int32) (err error) {
 func HandlePingRequest(r PacketReader) (pl int64, err error) {
 	var p Packet
 
-	p, err = readPacket(r)
+	p, err = ReadPacket(r)
 	if err != nil {
 		return 0, err
 	}
@@ -188,7 +188,7 @@ func SendPongResponse(w io.Writer, pl int64) (err error) {
 		return err
 	}
 
-	err = sendPacket(w, p)
+	err = SendPacket(w, p)
 	if err != nil {
 		return err
 	}
@@ -199,7 +199,7 @@ func SendPongResponse(w io.Writer, pl int64) (err error) {
 func HandleLoginStart(r PacketReader) (pr PlayerData, err error) {
 	var p Packet
 
-	p, err = readPacket(r)
+	p, err = ReadPacket(r)
 	if err != nil {
 		return PlayerData{}, err
 	}
@@ -207,7 +207,7 @@ func HandleLoginStart(r PacketReader) (pr PlayerData, err error) {
 		return PlayerData{}, errors.New("not a login start packet")
 	}
 
-	pr.Name, err = readString(&p.Data)
+	pr.Name, err = ReadString(&p.Data)
 	if err != nil {
 		return PlayerData{}, err
 	}
@@ -231,7 +231,7 @@ func SendLoginStart(w io.Writer, name string, uuidMSB, uuidLSB uint64) error {
 	var p Packet
 	p.ID = 0x00
 
-	err := writeString(&p.Data, name)
+	err := WriteString(&p.Data, name)
 	if err != nil {
 		return err
 	}
@@ -245,7 +245,7 @@ func SendLoginStart(w io.Writer, name string, uuidMSB, uuidLSB uint64) error {
 		return err
 	}
 
-	return sendPacket(w, p)
+	return SendPacket(w, p)
 }
 
 func SendDisconnect(w io.Writer, reason string) (err error) {
@@ -261,12 +261,12 @@ func SendDisconnect(w io.Writer, reason string) (err error) {
 		return err
 	}
 
-	err = writeString(&p.Data, string(rsMarshalled))
+	err = WriteString(&p.Data, string(rsMarshalled))
 	if err != nil {
 		return err
 	}
 
-	err = sendPacket(w, p)
+	err = SendPacket(w, p)
 	if err != nil {
 		return err
 	}

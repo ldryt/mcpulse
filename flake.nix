@@ -42,6 +42,11 @@
             buildInputs = with pkgs; [
               go
               delve
+
+              qemu
+              e2fsprogs
+              cdrkit
+              alpine-make-vm-image
             ];
             # https://github.com/go-delve/delve/issues/3085
             hardeningDisable = [ "fortify" ];

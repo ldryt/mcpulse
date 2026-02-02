@@ -4,7 +4,7 @@ import "io"
 
 // https://wiki.vg/Protocol#Type:String
 
-func readString(r PacketReader) (value string, err error) {
+func ReadString(r PacketReader) (value string, err error) {
 	var len int32
 	var buf []byte
 
@@ -23,7 +23,7 @@ func readString(r PacketReader) (value string, err error) {
 	return string(buf), nil
 }
 
-func writeString(w io.Writer, value string) (err error) {
+func WriteString(w io.Writer, value string) (err error) {
 	var len int = len(value)
 
 	err = writeVarInt(w, int32(len))

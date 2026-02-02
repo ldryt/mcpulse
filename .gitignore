@@ -1,1 +1,6 @@
 .direnv
+node-image/rootfs/bin/mcprobe
+*.raw
+*.qcow2
+*.iso
+*-data

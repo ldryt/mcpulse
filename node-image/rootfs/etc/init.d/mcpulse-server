@@ -1,0 +1,30 @@
+#!/sbin/openrc-run
+name="mcpulse-server"
+
+command="/usr/bin/bwrap"
+command_args=" \
+  --ro-bind / / \
+  --bind /srv/mcpulse/server /srv/mcpulse/server \
+  --chdir /srv/mcpulse/server \
+  --dev /dev \
+  --proc /proc \
+  --tmpfs /tmp \
+  --unshare-pid \
+  --share-net \
+  --die-with-parent \
+  --new-session \
+  -- /bin/sh /srv/mcpulse/scripts/start-server.sh"
+command_user="mcpulse-server-runner"
+command_background=true
+pidfile="/run/${RC_SVCNAME}.pid"
+
+output_log="/var/log/${RC_SVCNAME}.log"
+error_log="/var/log/${RC_SVCNAME}.err"
+start_pre() {
+  checkpath -f -o "$command_user:$command_user" -m 0644 "$output_log" "$error_log"
+}
+
+depend() {
+  need net
+  after cloud-final
+}

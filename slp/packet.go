@@ -19,7 +19,7 @@ type PacketReader interface {
 	io.ByteReader
 }
 
-func readPacket(r PacketReader) (p Packet, err error) {
+func ReadPacket(r PacketReader) (p Packet, err error) {
 	var PacketLength int32
 
 	PacketLength, err = readVarInt(r)
@@ -49,7 +49,7 @@ func readPacket(r PacketReader) (p Packet, err error) {
 	return p, nil
 }
 
-func sendPacket(w io.Writer, p Packet) (err error) {
+func SendPacket(w io.Writer, p Packet) (err error) {
 	var PacketLength int = sizeVarInt(p.ID) + p.Data.Len()
 
 	err = writeVarInt(w, int32(PacketLength))
